@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Particle Animation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Settings
+        const speed = 2;
+        const fov = 500;
+        let vanishingPointX, vanishingPointY;
+
+        // Particles
+        const particles = [];
+        const numParticles = 500;
+        function initializeParticles() {
+            particles.length = 0;
+            for (let i = 0; i < numParticles; i++) {
+                const ySpread = window.innerHeight;
+                const y = (Math.random() + Math.random() - 1) * ySpread;
+                particles.push({
+                    x: (Math.random() - 0.5) * window.innerWidth * 2,
+                    y: y,
+                    z: Math.random() * 2000,
+                    size: Math.random() * 3 + 1
+                });
+            }
+        }
+
+        // Fixed time step for consistent updates
+        const targetFPS = 60;
+        const timeStep = 1000 / targetFPS;
+        let lastTime = performance.now();
+        let accumulatedTime = 0;
+
+        function project(x, y, z) {
+            const scale = fov / (fov + z);
+            return {
+                x: x * scale + vanishingPointX,
+                y: y * scale + vanishingPointY,
+                scale: scale
+            };
+        }
+
+        function updateCanvasSize() {
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const devicePixelRatio = window.devicePixelRatio || 1;
+
+            // Set canvas resolution with device pixel ratio
+            canvas.width = windowWidth * devicePixelRatio;
+            canvas.height = windowHeight * devicePixelRatio;
+            canvas.style.width = windowWidth + 'px';
+            canvas.style.height = windowHeight + 'px';
+
+            // Reset transform and apply device pixel ratio scaling
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+
+            vanishingPointX = windowWidth / 2;
+            vanishingPointY = windowHeight / 2;
+
+            // Refresh the animation by reinitializing particles
+            initializeParticles();
+
+            // Redraw immediately
+            drawScene(ctx);
+        }
+
+        function drawScene(context) {
+            context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+            // Purple glow adjusted to window size
+            const gradient = context.createRadialGradient(
+                vanishingPointX, vanishingPointY, 0,
+                vanishingPointX, vanishingPointY, window.innerWidth
+            );
+            gradient.addColorStop(0, 'rgba(128, 0, 255, 0.2)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, window.innerWidth, window.innerHeight);
+
+            // Draw particles
+            particles.forEach(p => {
+                const proj = project(p.x, p.y, p.z);
+                const minEdgeDistance = Math.min(
+                    proj.x,
+                    window.innerWidth - proj.x,
+                    proj.y,
+                    window.innerHeight - proj.y
+                );
+                const edgeFadeDistance = 50;
+                const edgeFade = Math.min(1, minEdgeDistance / edgeFadeDistance);
+                const zFade = Math.max(0, 1 - (fov - p.z) / fov);
+                const fade = edgeFade * zFade;
+
+                context.beginPath();
+                context.arc(proj.x, proj.y, proj.scale * p.size, 0, Math.PI * 2);
+                context.fillStyle = `rgba(200, 100, 255, ${fade})`;
+                context.fill();
+            });
+        }
+
+        function updateParticles(deltaTime) {
+            const adjustedSpeed = speed * (deltaTime / (1000 / targetFPS));
+            particles.forEach(p => {
+                p.z -= adjustedSpeed;
+                if (p.z < -fov) {
+                    p.z = 2000;
+                    p.x = (Math.random() - 0.5) * window.innerWidth * 2;
+                    p.y = (Math.random() + Math.random() - 1) * window.innerHeight;
+                }
+            });
+        }
+
+        function animate(currentTime) {
+            const deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+            accumulatedTime += deltaTime;
+
+            while (accumulatedTime >= timeStep) {
+                updateParticles(timeStep);
+                accumulatedTime -= timeStep;
+            }
+
+            drawScene(ctx);
+            requestAnimationFrame(animate);
+        }
+
+        // Handle resize
+        window.addEventListener('resize', updateCanvasSize);
+
+        // Initial setup
+        initializeParticles();
+        updateCanvasSize();
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>
