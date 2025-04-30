@@ -8,7 +8,7 @@
         body {
             margin: 0;
             overflow: hidden;
-            background: radial-gradient(ellipse at center, #16252f 0%, #121f27 50%, #000000 100%);
+            background: radial-gradient(ellipse at center, #17162f 0%, #121227 50%, #000000 100%);
         }
         canvas {
             display: block;
@@ -90,8 +90,8 @@
                     mouseX, mouseY, 0,
                     mouseX, mouseY, mouseRadius
                 );
-                lightGradient.addColorStop(0, `rgba(255, 255, 255, ${lightenAmount})`);
-                lightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                lightGradient.addColorStop(0, `rgba(153, 150, 199, ${lightenAmount})`); // Brighter blue/purple
+                lightGradient.addColorStop(1, 'rgba(153, 150, 199, 0)');
             }
 
             // Adjust line width for high-DPI displays
@@ -112,7 +112,7 @@
                     context.globalCompositeOperation = 'source-over';
                 }
 
-                context.strokeStyle = `rgba(255, 255, 255, ${lineOpacity})`;
+                context.strokeStyle = `rgba(110, 107, 165, ${lineOpacity})`; // Muted blue/purple
                 context.stroke();
             }
 
@@ -130,7 +130,7 @@
                     context.globalCompositeOperation = 'source-over';
                 }
 
-                context.strokeStyle = `rgba(255, 255, 255, ${lineOpacity})`;
+                context.strokeStyle = `rgba(110, 107, 165, ${lineOpacity})`; // Muted blue/purple
                 context.stroke();
             }
         }
