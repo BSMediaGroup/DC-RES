@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Background Animation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: radial-gradient(ellipse at center, #17162f 0%, #121227 50%, #000000 100%);
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Settings
+        const gridPadding = 50;
+        const lineOpacity = 0.1;
+        const lightenAmount = 0.1725;
+        const mouseRadius = 578;
+        const baseGridSpacing = 120;
+        const maxGridSpacing = 50;
+        const minColumns = 8;
+        let mouseX = null;
+        let mouseY = null;
+
+        // Fixed time step
+        const targetFPS = 60;
+        const timeStep = 1000 / targetFPS;
+        let lastTime = performance.now();
+        let accumulatedTime = 0;
+
+        function updateCanvasSize() {
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const devicePixelRatio = window.devicePixelRatio || 1;
+
+            canvas.width = windowWidth * devicePixelRatio;
+            canvas.height = windowHeight * devicePixelRatio;
+            canvas.style.width = windowWidth + 'px';
+            canvas.style.height = windowHeight + 'px';
+
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+
+            drawScene(ctx);
+        }
+
+        function drawScene(context) {
+            context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+            // Calculate grid spacing dynamically
+            const gridWidth = window.innerWidth - 2 * gridPadding;
+            const gridHeight = window.innerHeight - 2 * gridPadding;
+            const scaleFactor = window.innerWidth / 1920;
+            let gridSpacing = Math.min(maxGridSpacing, baseGridSpacing * scaleFactor);
+
+            // Ensure at least 8 columns even at smaller widths
+            const effectiveColumns = Math.floor(gridWidth / gridSpacing);
+            if (effectiveColumns < minColumns) {
+                gridSpacing = gridWidth / minColumns;
+            }
+
+            // Calculate number of columns and rows to fill the padded area
+            const numColumns = Math.ceil(gridWidth / gridSpacing);
+            const numRows = Math.ceil(gridHeight / gridSpacing);
+
+            // Calculate total grid dimensions
+            const totalGridWidth = numColumns * gridSpacing;
+            const totalGridHeight = numRows * gridSpacing;
+
+            // Center the grid horizontally and vertically
+            const gridStartX = gridPadding + (gridWidth - totalGridWidth) / 2;
+            const gridStartY = gridPadding + (gridHeight - totalGridHeight) / 2;
+            const gridEndX = gridStartX + totalGridWidth;
+            const gridEndY = gridStartY + totalGridHeight;
+
+            // Create lightening effect if mouse is present
+            let lightGradient = null;
+            if (mouseX !== null && mouseY !== null) {
+                lightGradient = context.createRadialGradient(
+                    mouseX, mouseY, 0,
+                    mouseX, mouseY, mouseRadius
+                );
+                lightGradient.addColorStop(0, `rgba(153, 150, 199, ${lightenAmount})`); // Brighter blue/purple
+                lightGradient.addColorStop(1, 'rgba(153, 150, 199, 0)');
+            }
+
+            // Adjust line width for high-DPI displays
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            context.lineWidth = 1 / devicePixelRatio;
+
+            // Draw vertical grid lines
+            for (let i = 0; i <= numColumns; i++) {
+                const x = gridStartX + i * gridSpacing;
+                context.beginPath();
+                context.moveTo(x, gridStartY);
+                context.lineTo(x, gridEndY);
+
+                if (lightGradient) {
+                    context.globalCompositeOperation = 'lighter';
+                    context.strokeStyle = lightGradient;
+                    context.stroke();
+                    context.globalCompositeOperation = 'source-over';
+                }
+
+                context.strokeStyle = `rgba(110, 107, 165, ${lineOpacity})`; // Muted blue/purple
+                context.stroke();
+            }
+
+            // Draw horizontal grid lines to fill the padded height
+            for (let i = 0; i <= numRows; i++) {
+                const y = gridStartY + i * gridSpacing;
+                context.beginPath();
+                context.moveTo(gridStartX, y);
+                context.lineTo(gridEndX, y);
+
+                if (lightGradient) {
+                    context.globalCompositeOperation = 'lighter';
+                    context.strokeStyle = lightGradient;
+                    context.stroke();
+                    context.globalCompositeOperation = 'source-over';
+                }
+
+                context.strokeStyle = `rgba(110, 107, 165, ${lineOpacity})`; // Muted blue/purple
+                context.stroke();
+            }
+        }
+
+        function animate(currentTime) {
+            const deltaTime = currentTime - lastTime;
+            lastTime = currentTime;
+            accumulatedTime += deltaTime;
+
+            while (accumulatedTime >= timeStep) {
+                accumulatedTime -= timeStep;
+            }
+
+            drawScene(ctx);
+            requestAnimationFrame(animate);
+        }
+
+        // Listen for mouse events from the parent window via postMessage
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'mousemove') {
+                mouseX = event.data.x;
+                mouseY = event.data.y;
+            } else if (event.data.type === 'mouseout') {
+                mouseX = null;
+                mouseY = null;
+            }
+        });
+
+        // Handle resize
+        window.addEventListener('resize', updateCanvasSize);
+
+        // Initial setup
+        updateCanvasSize();
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>
