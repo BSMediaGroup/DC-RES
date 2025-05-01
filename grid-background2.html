@@ -150,6 +150,7 @@
 
         // Listen for mouse events from the parent window via postMessage
         window.addEventListener('message', (event) => {
+            console.log('Iframe received message:', event.data); // Debug log
             if (event.data.type === 'mousemove') {
                 mouseX = event.data.x;
                 mouseY = event.data.y;
