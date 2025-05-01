@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Grid Animation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: #000;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Canvas setup
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Grid settings
+        const gridSpacing = 100;
+        const maxGridLines = 30;
+        const speed = 2;
+        let zOffset = 0;
+        const fov = 500;
+        const vanishingPointX = canvas.width / 2;
+        const vanishingPointY = canvas.height * 0.5;
+
+        // Particles
+        const particles = [];
+        const numParticles = 500;
+        for (let i = 0; i < numParticles; i++) {
+            const ySpread = canvas.height;
+            const y = (Math.random() + Math.random() - 1) * ySpread;
+            particles.push({
+                x: (Math.random() - 0.5) * canvas.width * 2,
+                y: y,
+                z: Math.random() * 2000,
+                size: Math.random() * 3 + 1
+            });
+        }
+
+        function project(x, y, z) {
+            const scale = fov / (fov + z);
+            return {
+                x: x * scale + vanishingPointX,
+                y: y * scale + vanishingPointY,
+                scale: scale
+            };
+        }
+
+        function calculateFadeY(y) {
+            const startFade = canvas.height * 0.7;  // Start fading at 70% of screen height
+            const endFade = canvas.height * 1.5;    // Fully faded at 150% of screen height
+            if (y < startFade) return 1;
+            if (y > endFade) return 0;
+            return 1 - (y - startFade) / (endFade - startFade);
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Purple glow
+            const gradient = ctx.createRadialGradient(
+                vanishingPointX, vanishingPointY, 0,
+                vanishingPointX, vanishingPointY, canvas.width
+            );
+            gradient.addColorStop(0, 'rgba(128, 0, 255, 0.2)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            zOffset += speed;
+            if (zOffset > gridSpacing) zOffset -= gridSpacing;
+
+            // Draw grid at y=1000 to extend well below the screen
+            for (let i = -maxGridLines; i <= maxGridLines; i++) {
+                const x = i * gridSpacing;
+                for (let j = -20; j <= 80; j++) {  // Extended z-range
+                    const z = j * gridSpacing - zOffset;
+                    const adjustedZ = ((z + 2000) % 2000 + 2000) % 2000;
+                    if (adjustedZ < -fov) continue;
+
+                    const y = 1000;  // Increased to push grid lower
+                    const p1 = project(x, y, adjustedZ);
+                    const p2 = project(x + gridSpacing, y, adjustedZ);
+                    const p3 = project(x, y, adjustedZ + gridSpacing);
+
+                    const maxX = maxGridLines * gridSpacing * 0.5;
+                    const fadeX = Math.max(0, 1 - Math.abs(x) / maxX);
+                    const fadeY = calculateFadeY(p1.y);
+                    const fadeYVertical = calculateFadeY(Math.max(p1.y, p3.y)); // Fade based on lower point
+                    const zFade = Math.max(0, 1 - adjustedZ / 1500);
+                    const fade = fadeX * zFade;
+
+                    // Horizontal lines
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.strokeStyle = `rgba(128, 0, 255, ${p1.scale * fade * fadeY})`;
+                    ctx.lineWidth = Math.max(1, p1.scale * 2);
+                    ctx.stroke();
+
+                    // Vertical lines
+                    ctx.beginPath();
+                    ctx.moveTo(p1.x, p1.y);
+                    ctx.lineTo(p3.x, p3.y);
+                    ctx.strokeStyle = `rgba(128, 0, 255, ${p1.scale * fade * fadeYVertical})`;
+                    ctx.lineWidth = Math.max(1, p1.scale * 2);
+                    ctx.stroke();
+
+                    // Nodes
+                    ctx.beginPath();
+                    ctx.arc(p1.x, p1.y, Math.max(1, p1.scale * 4), 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(200, 100, 255, ${p1.scale * fade * fadeY})`;
+                    ctx.fill();
+                }
+            }
+
+            // Update and draw particles
+            particles.forEach(p => {
+                p.z -= speed;
+                if (p.z < -fov) {
+                    p.z = 2000;
+                    p.x = (Math.random() - 0.5) * canvas.width * 2;
+                    p.y = (Math.random() + Math.random() - 1) * canvas.height;
+                }
+
+                const proj = project(p.x, p.y, p.z);
+                const minEdgeDistance = Math.min(proj.x, canvas.width - proj.x, proj.y, canvas.height - proj.y);
+                const edgeFadeDistance = 50;
+                const edgeFade = Math.min(1, minEdgeDistance / edgeFadeDistance);
+                const zFade = Math.max(0, 1 - (fov - p.z) / fov);
+                const fade = edgeFade * zFade;
+
+                ctx.beginPath();
+                ctx.arc(proj.x, proj.y, proj.scale * p.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(200, 100, 255, ${fade})`;
+                ctx.fill();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            vanishingPointX = canvas.width / 2;
+            vanishingPointY = canvas.height * 0.5;
+        });
+    </script>
+</body>
+</html>
