@@ -143,57 +143,92 @@
                 const x = gridStartX + i * gridSpacing;
                 const distanceFromLeft = x - gridStartX;
                 const distanceFromRight = gridEndX - x;
-                let opacity = lineOpacity;
+                const yStart = gridStartY;
+                const yEnd = gridEndY;
 
-                // Apply fade effect on the sides
-                if (distanceFromLeft < fadeDistance) {
-                    opacity = lineOpacity * (distanceFromLeft / fadeDistance);
-                } else if (distanceFromRight < fadeDistance) {
-                    opacity = lineOpacity * (distanceFromRight / fadeDistance);
+                for (let y = yStart; y <= yEnd; y += 1) {
+                    const distanceFromTop = y - gridStartY;
+                    const distanceFromBottom = gridEndY - y;
+                    let opacity = lineOpacity;
+
+                    // Apply side fade
+                    if (distanceFromLeft < fadeDistance) {
+                        opacity = lineOpacity * (distanceFromLeft / fadeDistance);
+                    } else if (distanceFromRight < fadeDistance) {
+                        opacity = lineOpacity * (distanceFromRight / fadeDistance);
+                    }
+
+                    // Apply top and bottom fade
+                    if (distanceFromTop < fadeDistance) {
+                        opacity *= (distanceFromTop / fadeDistance);
+                    } else if (distanceFromBottom < fadeDistance) {
+                        opacity *= (distanceFromBottom / fadeDistance);
+                    }
+
+                    if (y === yStart || y >= yEnd - 1) {
+                        context.beginPath();
+                        context.moveTo(x, y);
+                        context.lineTo(x, y + 1);
+                        context.strokeStyle = `rgba(110, 107, 165, ${opacity})`;
+                        context.stroke();
+                    }
                 }
 
-                context.beginPath();
-                context.moveTo(x, gridStartY);
-                context.lineTo(x, gridEndY);
-
                 if (lightGradient) {
+                    context.beginPath();
+                    context.moveTo(x, yStart);
+                    context.lineTo(x, yEnd);
                     context.globalCompositeOperation = 'lighter';
                     context.strokeStyle = lightGradient;
                     context.stroke();
                     context.globalCompositeOperation = 'source-over';
                 }
-
-                context.strokeStyle = `rgba(110, 107, 165, ${opacity})`; // Muted blue/purple with fade
-                context.stroke();
             }
 
-            // Draw horizontal grid lines with fade on top and bottom
+            // Draw horizontal grid lines with fade on all sides
             for (let i = 0; i <= numRows; i++) {
                 const y = gridStartY + i * gridSpacing;
                 const distanceFromTop = y - gridStartY;
                 const distanceFromBottom = gridEndY - y;
                 let opacity = lineOpacity;
 
-                // Apply fade effect on top and bottom
+                // Apply top and bottom fade
                 if (distanceFromTop < fadeDistance) {
                     opacity = lineOpacity * (distanceFromTop / fadeDistance);
                 } else if (distanceFromBottom < fadeDistance) {
                     opacity = lineOpacity * (distanceFromBottom / fadeDistance);
                 }
 
-                context.beginPath();
-                context.moveTo(gridStartX, y);
-                context.lineTo(gridEndX, y);
+                // Apply side fade to horizontal lines
+                for (let x = gridStartX; x <= gridEndX; x += 1) {
+                    const distanceFromLeft = x - gridStartX;
+                    const distanceFromRight = gridEndX - x;
+                    let finalOpacity = opacity;
+
+                    if (distanceFromLeft < fadeDistance) {
+                        finalOpacity *= (distanceFromLeft / fadeDistance);
+                    } else if (distanceFromRight < fadeDistance) {
+                        finalOpacity *= (distanceFromRight / fadeDistance);
+                    }
+
+                    if (x === gridStartX || x >= gridEndX - 1) {
+                        context.beginPath();
+                        context.moveTo(x, y);
+                        context.lineTo(x + 1, y);
+                        context.strokeStyle = `rgba(110, 107, 165, ${finalOpacity})`;
+                        context.stroke();
+                    }
+                }
 
                 if (lightGradient) {
+                    context.beginPath();
+                    context.moveTo(gridStartX, y);
+                    context.lineTo(gridEndX, y);
                     context.globalCompositeOperation = 'lighter';
                     context.strokeStyle = lightGradient;
                     context.stroke();
                     context.globalCompositeOperation = 'source-over';
                 }
-
-                context.strokeStyle = `rgba(110, 107, 165, ${opacity})`; // Muted blue/purple with fade
-                context.stroke();
             }
         }
 

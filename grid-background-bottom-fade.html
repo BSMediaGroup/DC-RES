@@ -138,22 +138,39 @@
             const devicePixelRatio = window.devicePixelRatio || 1;
             context.lineWidth = 1 / devicePixelRatio;
 
-            // Draw vertical grid lines
+            // Draw vertical grid lines (no fade on sides)
             for (let i = 0; i <= numColumns; i++) {
                 const x = gridStartX + i * gridSpacing;
-                context.beginPath();
-                context.moveTo(x, gridStartY);
-                context.lineTo(x, gridEndY);
+                const yStart = gridStartY;
+                const yEnd = gridEndY;
+
+                // Apply bottom fade to vertical lines
+                for (let y = yStart; y <= yEnd; y += 1) {
+                    const distanceFromBottom = gridEndY - y;
+                    let opacity = lineOpacity;
+
+                    if (distanceFromBottom < fadeDistance) {
+                        opacity = lineOpacity * (distanceFromBottom / fadeDistance);
+                    }
+
+                    if (y === yStart || y >= yEnd - 1) {
+                        context.beginPath();
+                        context.moveTo(x, y);
+                        context.lineTo(x, y + 1);
+                        context.strokeStyle = `rgba(110, 107, 165, ${opacity})`;
+                        context.stroke();
+                    }
+                }
 
                 if (lightGradient) {
+                    context.beginPath();
+                    context.moveTo(x, yStart);
+                    context.lineTo(x, yEnd);
                     context.globalCompositeOperation = 'lighter';
                     context.strokeStyle = lightGradient;
                     context.stroke();
                     context.globalCompositeOperation = 'source-over';
                 }
-
-                context.strokeStyle = `rgba(110, 107, 165, ${lineOpacity})`; // Muted blue/purple
-                context.stroke();
             }
 
             // Draw horizontal grid lines with bottom fade
@@ -161,7 +178,7 @@
                 const y = gridStartY + i * gridSpacing;
                 const distanceFromBottom = gridEndY - y;
                 let opacity = lineOpacity;
-                
+
                 // Apply fade effect at the bottom
                 if (distanceFromBottom < fadeDistance) {
                     opacity = lineOpacity * (distanceFromBottom / fadeDistance);
