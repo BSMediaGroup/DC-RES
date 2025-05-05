@@ -68,7 +68,7 @@
         const baseGridSpacing = 120;
         const maxGridSpacing = 50;
         const minColumns = 8;
-        const fadeDistance = 100; // Distance over which the bottom fades
+        let fadeDistance; // Will be calculated as 4 * gridSpacing
         let mouseX = null;
         let mouseY = null;
 
@@ -123,6 +123,9 @@
             const gridEndX = gridStartX + totalGridWidth;
             const gridEndY = gridStartY + totalGridHeight;
 
+            // Calculate fade distance as 4 rows
+            fadeDistance = 4 * gridSpacing;
+
             // Create lightening effect if mouse is present
             let lightGradient = null;
             if (mouseX !== null && mouseY !== null) {
@@ -138,28 +141,26 @@
             const devicePixelRatio = window.devicePixelRatio || 1;
             context.lineWidth = 1 / devicePixelRatio;
 
-            // Draw vertical grid lines (no fade on sides)
+            // Draw vertical grid lines (no fade on sides, but apply bottom fade)
             for (let i = 0; i <= numColumns; i++) {
                 const x = gridStartX + i * gridSpacing;
                 const yStart = gridStartY;
                 const yEnd = gridEndY;
 
-                // Apply bottom fade to vertical lines
                 for (let y = yStart; y <= yEnd; y += 1) {
-                    const distanceFromBottom = gridEndY - y;
+                    const distanceFromBottom = yEnd - y;
                     let opacity = lineOpacity;
 
+                    // Apply bottom fade
                     if (distanceFromBottom < fadeDistance) {
                         opacity = lineOpacity * (distanceFromBottom / fadeDistance);
                     }
 
-                    if (y === yStart || y >= yEnd - 1) {
-                        context.beginPath();
-                        context.moveTo(x, y);
-                        context.lineTo(x, y + 1);
-                        context.strokeStyle = `rgba(110, 107, 165, ${opacity})`;
-                        context.stroke();
-                    }
+                    context.beginPath();
+                    context.moveTo(x, y);
+                    context.lineTo(x, y + 1);
+                    context.strokeStyle = `rgba(110, 107, 165, ${opacity})`;
+                    context.stroke();
                 }
 
                 if (lightGradient) {
@@ -213,16 +214,15 @@
             requestAnimationFrame(animate);
         }
 
-        // Listen for mouse events from the parent window via postMessage
-        window.addEventListener('message', (event) => {
-            console.log('Iframe received message:', event.data); // Debug log
-            if (event.data.type === 'mousemove') {
-                mouseX = event.data.x;
-                mouseY = event.data.y;
-            } else if (event.data.type === 'mouseout') {
-                mouseX = null;
-                mouseY = null;
-            }
+        // Mouse events (reverted to direct listeners)
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        window.addEventListener('mouseout', () => {
+            mouseX = null;
+            mouseY = null;
         });
 
         // Handle resize

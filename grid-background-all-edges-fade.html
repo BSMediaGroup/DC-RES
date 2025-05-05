@@ -68,7 +68,7 @@
         const baseGridSpacing = 120;
         const maxGridSpacing = 50;
         const minColumns = 8;
-        const fadeDistance = 100; // Distance over which all edges fade
+        let fadeDistance; // Will be calculated as 4 * gridSpacing
         let mouseX = null;
         let mouseY = null;
 
@@ -123,6 +123,9 @@
             const gridEndX = gridStartX + totalGridWidth;
             const gridEndY = gridStartY + totalGridHeight;
 
+            // Calculate fade distance as 4 grid spacings
+            fadeDistance = 4 * gridSpacing;
+
             // Create lightening effect if mouse is present
             let lightGradient = null;
             if (mouseX !== null && mouseY !== null) {
@@ -148,7 +151,7 @@
 
                 for (let y = yStart; y <= yEnd; y += 1) {
                     const distanceFromTop = y - gridStartY;
-                    const distanceFromBottom = gridEndY - y;
+                    const distanceFromBottom = yEnd - y;
                     let opacity = lineOpacity;
 
                     // Apply side fade
@@ -165,13 +168,11 @@
                         opacity *= (distanceFromBottom / fadeDistance);
                     }
 
-                    if (y === yStart || y >= yEnd - 1) {
-                        context.beginPath();
-                        context.moveTo(x, y);
-                        context.lineTo(x, y + 1);
-                        context.strokeStyle = `rgba(110, 107, 165, ${opacity})`;
-                        context.stroke();
-                    }
+                    context.beginPath();
+                    context.moveTo(x, y);
+                    context.lineTo(x, y + 1);
+                    context.strokeStyle = `rgba(110, 107, 165, ${opacity})`;
+                    context.stroke();
                 }
 
                 if (lightGradient) {
@@ -199,25 +200,23 @@
                     opacity = lineOpacity * (distanceFromBottom / fadeDistance);
                 }
 
-                // Apply side fade to horizontal lines
                 for (let x = gridStartX; x <= gridEndX; x += 1) {
                     const distanceFromLeft = x - gridStartX;
                     const distanceFromRight = gridEndX - x;
                     let finalOpacity = opacity;
 
+                    // Apply side fade
                     if (distanceFromLeft < fadeDistance) {
                         finalOpacity *= (distanceFromLeft / fadeDistance);
                     } else if (distanceFromRight < fadeDistance) {
                         finalOpacity *= (distanceFromRight / fadeDistance);
                     }
 
-                    if (x === gridStartX || x >= gridEndX - 1) {
-                        context.beginPath();
-                        context.moveTo(x, y);
-                        context.lineTo(x + 1, y);
-                        context.strokeStyle = `rgba(110, 107, 165, ${finalOpacity})`;
-                        context.stroke();
-                    }
+                    context.beginPath();
+                    context.moveTo(x, y);
+                    context.lineTo(x + 1, y);
+                    context.strokeStyle = `rgba(110, 107, 165, ${finalOpacity})`;
+                    context.stroke();
                 }
 
                 if (lightGradient) {
@@ -245,16 +244,15 @@
             requestAnimationFrame(animate);
         }
 
-        // Listen for mouse events from the parent window via postMessage
-        window.addEventListener('message', (event) => {
-            console.log('Iframe received message:', event.data); // Debug log
-            if (event.data.type === 'mousemove') {
-                mouseX = event.data.x;
-                mouseY = event.data.y;
-            } else if (event.data.type === 'mouseout') {
-                mouseX = null;
-                mouseY = null;
-            }
+        // Mouse events (reverted to direct listeners)
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        window.addEventListener('mouseout', () => {
+            mouseX = null;
+            mouseY = null;
         });
 
         // Handle resize

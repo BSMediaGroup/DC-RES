@@ -187,16 +187,15 @@
             requestAnimationFrame(animate);
         }
 
-        // Listen for mouse events from the parent window via postMessage
-        window.addEventListener('message', (event) => {
-            console.log('Iframe received message:', event.data); // Debug log
-            if (event.data.type === 'mousemove') {
-                mouseX = event.data.x;
-                mouseY = event.data.y;
-            } else if (event.data.type === 'mouseout') {
-                mouseX = null;
-                mouseY = null;
-            }
+        // Mouse events (reverted to direct listeners)
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        window.addEventListener('mouseout', () => {
+            mouseX = null;
+            mouseY = null;
         });
 
         // Handle resize
