@@ -144,11 +144,12 @@
             // Draw vertical grid lines (no fade on sides, but apply bottom fade)
             for (let i = 0; i <= numColumns; i++) {
                 const x = gridStartX + i * gridSpacing;
-                const yStart = gridStartY;
-                const yEnd = gridEndY;
 
-                for (let y = yStart; y <= yEnd; y += 1) {
-                    const distanceFromBottom = yEnd - y;
+                // Draw the line in segments to apply bottom fade
+                for (let j = 0; j < numRows; j++) {
+                    const yStart = gridStartY + j * gridSpacing;
+                    const yEnd = yStart + gridSpacing;
+                    const distanceFromBottom = gridEndY - yStart;
                     let opacity = lineOpacity;
 
                     // Apply bottom fade
@@ -157,20 +158,43 @@
                     }
 
                     context.beginPath();
-                    context.moveTo(x, y);
-                    context.lineTo(x, y + 1);
+                    context.moveTo(x, yStart);
+                    context.lineTo(x, yEnd);
+
+                    if (lightGradient) {
+                        context.globalCompositeOperation = 'lighter';
+                        context.strokeStyle = lightGradient;
+                        context.stroke();
+                        context.globalCompositeOperation = 'source-over';
+                    }
+
                     context.strokeStyle = `rgba(110, 107, 165, ${opacity})`;
                     context.stroke();
                 }
 
-                if (lightGradient) {
+                // Draw the last segment to the end
+                const lastYStart = gridStartY + numRows * gridSpacing;
+                if (lastYStart < gridEndY) {
+                    const distanceFromBottom = gridEndY - lastYStart;
+                    let opacity = lineOpacity;
+
+                    if (distanceFromBottom < fadeDistance) {
+                        opacity = lineOpacity * (distanceFromBottom / fadeDistance);
+                    }
+
                     context.beginPath();
-                    context.moveTo(x, yStart);
-                    context.lineTo(x, yEnd);
-                    context.globalCompositeOperation = 'lighter';
-                    context.strokeStyle = lightGradient;
+                    context.moveTo(x, lastYStart);
+                    context.lineTo(x, gridEndY);
+
+                    if (lightGradient) {
+                        context.globalCompositeOperation = 'lighter';
+                        context.strokeStyle = lightGradient;
+                        context.stroke();
+                        context.globalCompositeOperation = 'source-over';
+                    }
+
+                    context.strokeStyle = `rgba(110, 107, 165, ${opacity})`;
                     context.stroke();
-                    context.globalCompositeOperation = 'source-over';
                 }
             }
 
@@ -214,7 +238,7 @@
             requestAnimationFrame(animate);
         }
 
-        // Mouse events (reverted to direct listeners)
+        // Mouse events
         window.addEventListener('mousemove', (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;

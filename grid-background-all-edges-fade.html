@@ -146,12 +146,13 @@
                 const x = gridStartX + i * gridSpacing;
                 const distanceFromLeft = x - gridStartX;
                 const distanceFromRight = gridEndX - x;
-                const yStart = gridStartY;
-                const yEnd = gridEndY;
 
-                for (let y = yStart; y <= yEnd; y += 1) {
-                    const distanceFromTop = y - gridStartY;
-                    const distanceFromBottom = yEnd - y;
+                // Draw the line in segments to apply top and bottom fade
+                for (let j = 0; j < numRows; j++) {
+                    const yStart = gridStartY + j * gridSpacing;
+                    const yEnd = yStart + gridSpacing;
+                    const distanceFromTop = yStart - gridStartY;
+                    const distanceFromBottom = gridEndY - yStart;
                     let opacity = lineOpacity;
 
                     // Apply side fade
@@ -169,20 +170,54 @@
                     }
 
                     context.beginPath();
-                    context.moveTo(x, y);
-                    context.lineTo(x, y + 1);
+                    context.moveTo(x, yStart);
+                    context.lineTo(x, yEnd);
+
+                    if (lightGradient) {
+                        context.globalCompositeOperation = 'lighter';
+                        context.strokeStyle = lightGradient;
+                        context.stroke();
+                        context.globalCompositeOperation = 'source-over';
+                    }
+
                     context.strokeStyle = `rgba(110, 107, 165, ${opacity})`;
                     context.stroke();
                 }
 
-                if (lightGradient) {
+                // Draw the last segment to the end
+                const lastYStart = gridStartY + numRows * gridSpacing;
+                if (lastYStart < gridEndY) {
+                    const distanceFromTop = lastYStart - gridStartY;
+                    const distanceFromBottom = gridEndY - lastYStart;
+                    let opacity = lineOpacity;
+
+                    // Apply side fade
+                    if (distanceFromLeft < fadeDistance) {
+                        opacity = lineOpacity * (distanceFromLeft / fadeDistance);
+                    } else if (distanceFromRight < fadeDistance) {
+                        opacity = lineOpacity * (distanceFromRight / fadeDistance);
+                    }
+
+                    // Apply top and bottom fade
+                    if (distanceFromTop < fadeDistance) {
+                        opacity *= (distanceFromTop / fadeDistance);
+                    } else if (distanceFromBottom < fadeDistance) {
+                        opacity *= (distanceFromBottom / fadeDistance);
+                    }
+
                     context.beginPath();
-                    context.moveTo(x, yStart);
-                    context.lineTo(x, yEnd);
-                    context.globalCompositeOperation = 'lighter';
-                    context.strokeStyle = lightGradient;
+                    context.moveTo(x, lastYStart);
+                    context.lineTo(x, gridEndY);
+
+                    if (lightGradient) {
+                        context.globalCompositeOperation = 'lighter';
+                        context.strokeStyle = lightGradient;
+                        context.stroke();
+                        context.globalCompositeOperation = 'source-over';
+                    }
+
+                    context.strokeStyle = `rgba(110, 107, 165, ${opacity})`;
                     context.stroke();
-                    context.globalCompositeOperation = 'source-over';
                 }
             }
 
@@ -200,9 +235,12 @@
                     opacity = lineOpacity * (distanceFromBottom / fadeDistance);
                 }
 
-                for (let x = gridStartX; x <= gridEndX; x += 1) {
-                    const distanceFromLeft = x - gridStartX;
-                    const distanceFromRight = gridEndX - x;
+                // Draw the line in segments to apply side fade
+                for (let j = 0; j < numColumns; j++) {
+                    const xStart = gridStartX + j * gridSpacing;
+                    const xEnd = xStart + gridSpacing;
+                    const distanceFromLeft = xStart - gridStartX;
+                    const distanceFromRight = gridEndX - xStart;
                     let finalOpacity = opacity;
 
                     // Apply side fade
@@ -213,20 +251,47 @@
                     }
 
                     context.beginPath();
-                    context.moveTo(x, y);
-                    context.lineTo(x + 1, y);
+                    context.moveTo(xStart, y);
+                    context.lineTo(xEnd, y);
+
+                    if (lightGradient) {
+                        context.globalCompositeOperation = 'lighter';
+                        context.strokeStyle = lightGradient;
+                        context.stroke();
+                        context.globalCompositeOperation = 'source-over';
+                    }
+
                     context.strokeStyle = `rgba(110, 107, 165, ${finalOpacity})`;
                     context.stroke();
                 }
 
-                if (lightGradient) {
+                // Draw the last segment to the end
+                const lastXStart = gridStartX + numColumns * gridSpacing;
+                if (lastXStart < gridEndX) {
+                    const distanceFromLeft = lastXStart - gridStartX;
+                    const distanceFromRight = gridEndX - lastXStart;
+                    let finalOpacity = opacity;
+
+                    // Apply side fade
+                    if (distanceFromLeft < fadeDistance) {
+                        finalOpacity *= (distanceFromLeft / fadeDistance);
+                    } else if (distanceFromRight < fadeDistance) {
+                        finalOpacity *= (distanceFromRight / fadeDistance);
+                    }
+
                     context.beginPath();
-                    context.moveTo(gridStartX, y);
+                    context.moveTo(lastXStart, y);
                     context.lineTo(gridEndX, y);
-                    context.globalCompositeOperation = 'lighter';
-                    context.strokeStyle = lightGradient;
+
+                    if (lightGradient) {
+                        context.globalCompositeOperation = 'lighter';
+                        context.strokeStyle = lightGradient;
+                        context.stroke();
+                        context.globalCompositeOperation = 'source-over';
+                    }
+
+                    context.strokeStyle = `rgba(110, 107, 165, ${finalOpacity})`;
                     context.stroke();
-                    context.globalCompositeOperation = 'source-over';
                 }
             }
         }
@@ -244,7 +309,7 @@
             requestAnimationFrame(animate);
         }
 
-        // Mouse events (reverted to direct listeners)
+        // Mouse events
         window.addEventListener('mousemove', (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;
