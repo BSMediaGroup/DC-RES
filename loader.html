@@ -112,13 +112,29 @@
     </style>
 </head>
 <body>
-    <div id="loader" class="loader danielclancy-loader">
+    <div id="loader" class="loader">
         <div id="particles-js"></div>
-        <img src="https://raw.githubusercontent.com/BSMediaGroup/DC-RES/e284a928892c048cfd565a93d3a9737f680d7b1f/SVG/DC-LOGO-ICON.svg" alt="Daniel Clancy Logo" class="loader-logo">
-        <div class="loader-text">loading danielclancy.net...</div>
+        <img src="https://raw.githubusercontent.com/BSMediaGroup/DC-RES/e284a928892c048cfd565a93d3a9737f680d7b1f/SVG/DC-LOGO-ICON.svg" alt="Logo" class="loader-logo">
+        <div id="loader-text" class="loader-text"></div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
     <script>
+        // Get the page parameter from the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const page = urlParams.get('page') || 'danielclancy';
+
+        // Update the loader class and text based on the page
+        const loader = document.getElementById('loader');
+        const loaderText = document.getElementById('loader-text');
+        if (page === 'danielclancy') {
+            loader.classList.add('danielclancy-loader');
+            loaderText.textContent = 'loading danielclancy.net...';
+        } else if (page === 'cyanide') {
+            loader.classList.add('cyanide-loader');
+            loaderText.textContent = 'loading cyanide.digital...';
+        }
+
+        // Initialize particles.js
         if (typeof particlesJS !== 'undefined') {
             particlesJS('particles-js', {
                 particles: {
@@ -146,9 +162,9 @@
             });
             console.log('Particles initialized');
         }
+
         // Automatically hide after 3 seconds
         setTimeout(() => {
-            const loader = document.getElementById('loader');
             loader.style.opacity = '0';
             loader.style.transition = 'opacity 1s';
             setTimeout(() => {
