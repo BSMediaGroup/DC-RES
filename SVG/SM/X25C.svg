@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 1000 1000" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g id="Layer-1" serif:id="Layer 1" transform="matrix(1,0,0,1,-0.0001,0.0003)">
+        <g transform="matrix(1,0,0,1,-6.9999,5.4997)">
+            <rect x="120" y="141" width="774" height="707" style="fill:white;"/>
+        </g>
+        <g transform="matrix(0.607896,0.794017,0.794017,-0.607896,562.538,182.971)">
+            <path d="M-108.14,-263.827L499.923,-263.827L534.254,-218.985L-71.25,-215.643L-108.14,-263.827Z" style="fill:white;"/>
+            <clipPath id="_clip1">
+                <path d="M-108.14,-263.827L499.923,-263.827L534.254,-218.985L-71.25,-215.643L-108.14,-263.827Z"/>
+            </clipPath>
+            <g clip-path="url(#_clip1)">
+                <g transform="matrix(-0.13223,-1.77873,-1.20998,-0.0343184,927.477,1587.44)">
+                    <ellipse cx="582.5" cy="459.5" rx="797.5" ry="686.5" style="fill:url(#_Radial2);"/>
+                </g>
+            </g>
+        </g>
+        <g transform="matrix(1,0,0,1,627.057,199.904)">
+            <path d="M0,600.192L-160.568,390.235L-344.391,600.192L-446.269,600.192L-209.292,327.78L-459.557,-0.001L-249.379,-0.001L-104.314,191.796L65.556,-0.001L167.434,-0.001L-56.254,254.694L205.084,600.192L0,600.192ZM122.943,-199.904L-377.057,-199.904C-515.036,-199.904 -627.057,-87.883 -627.057,50.096L-627.057,550.096C-627.057,688.076 -515.036,800.096 -377.057,800.096L122.943,800.096C260.922,800.096 372.943,688.076 372.943,550.096L372.943,50.096C372.943,-87.883 260.922,-199.904 122.943,-199.904" style="fill:white;"/>
+            <clipPath id="_clip3">
+                <path d="M0,600.192L-160.568,390.235L-344.391,600.192L-446.269,600.192L-209.292,327.78L-459.557,-0.001L-249.379,-0.001L-104.314,191.796L65.556,-0.001L167.434,-0.001L-56.254,254.694L205.084,600.192L0,600.192ZM122.943,-199.904L-377.057,-199.904C-515.036,-199.904 -627.057,-87.883 -627.057,50.096L-627.057,550.096C-627.057,688.076 -515.036,800.096 -377.057,800.096L122.943,800.096C260.922,800.096 372.943,688.076 372.943,550.096L372.943,50.096C372.943,-87.883 260.922,-199.904 122.943,-199.904"/>
+            </clipPath>
+            <g clip-path="url(#_clip3)">
+                <g transform="matrix(-1.49272,0.976289,-0.762791,-0.939882,1759.75,-245.5)">
+                    <ellipse cx="582.5" cy="459.5" rx="797.5" ry="686.5" style="fill:url(#_Radial4);"/>
+                </g>
+            </g>
+        </g>
+    </g>
+    <defs>
+        <radialGradient id="_Radial2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1595,0,0,1373,-215,459.5)"><stop offset="0" style="stop-color:white;stop-opacity:1"/><stop offset="1" style="stop-color:black;stop-opacity:1"/></radialGradient>
+        <radialGradient id="_Radial4" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(1595,0,0,1373,-215,459.5)"><stop offset="0" style="stop-color:white;stop-opacity:1"/><stop offset="1" style="stop-color:black;stop-opacity:1"/></radialGradient>
+    </defs>
+</svg>
